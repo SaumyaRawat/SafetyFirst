@@ -11,6 +11,7 @@ class MyApp(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.pushButton.clicked.connect(self.StartMonitoring)
+        #self.ui.closeButton.clicked.connect(self, Qt.SIGNAL('triggered()'), self.closeEvent)
 
     def StartMonitoring(self):
         #price = int(self.ui.price_box.toPlainText())
@@ -19,13 +20,13 @@ class MyApp(QMainWindow):
         #total_price_string = “The total price with tax is: ” + str(total_price)
         #self.ui.results_window.setText(total_price_string)
         self.ui.pushButton.setText("Monitoring!")
+        self.ui.pushButton.setStyleSheet("background-image: url(red.png);")
         QApplication.processEvents()
         pupil.main()
     
     def closeEvent(self, event):
-        logger.info("stopping spin")
-        self.stylusProximityControlOff()
-        self.deleteLater() 
+        print("Closing")
+        self.destory()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
