@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication
-from PyQt5 import uic
+from PyQt5 import uic, QtCore, QtGui
 import pupil
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType("SafetyFirst.ui")
@@ -31,5 +31,6 @@ class MyApp(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyApp()
-    window.show()
+    #window.show()
+    window.showMaximized()
     sys.exit(app.exec_())
