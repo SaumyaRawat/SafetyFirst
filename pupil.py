@@ -4,22 +4,20 @@ import cv2
 import time
 import simpleaudio as sa
 wave_obj = sa.WaveObject.from_wave_file("alert.wav")
+look_ahead = sa.WaveObject.from_wave_file("look_ahead.wav")
 
-def main():
+def main():#indicator):
 	cap = cv2.VideoCapture(0) 	#640,480
 	w = 640
 	h = 480
 
 	count_open = 0
 	count_closed = 0
+	count_side = 0
 
 	while(cap.isOpened()):
 		ret, frame = cap.read()
-		if ret==True:	
-			#downsample
-			#frameD = cv2.pyrDown(cv2.pyrDown(frame))
-			#frameDBW = cv2.cvtColor(frameD,cv2.COLOR_RGB2GRAY)
-		
+		if ret==True:			
 			#detect face
 			frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
 			faces = cv2.CascadeClassifier('haarcascade_eye.xml')
@@ -33,12 +31,24 @@ def main():
 			windowClose = np.ones((5,5),np.uint8)
 			windowOpen = np.ones((2,2),np.uint8)
 			windowErode = np.ones((2,2),np.uint8)
-			if detected2:
-				count_closed += 1
-			if count_closed > 15:
+
+			count_closed += 1
+			if len(detected2)==0:
+			    count_side+=1
+			
+			if count_side > 2:
+				print('Look Ahead!')
+				play_sound = look_ahead.play()
+				play_sound.wait_done()
+				count_closed = 0
+				count_side = 0
+
+			if count_closed > 3:
+				print('Wake Up!')
 				play_obj = wave_obj.play()
 				play_obj.wait_done()
 			count_open = 0
+
 			#draw square
 			for (x,y,w,h) in detected:
 				cv2.rectangle(frame, (x,y), ((x+w),(y+h)), (0,0,255),1)	
@@ -48,6 +58,7 @@ def main():
 				pupilO = pupilFrame
 				count_open += 1
 				count_closed = 0
+				count_side = 0
 
 				ret, pupilFrame = cv2.threshold(pupilFrame,55,255,cv2.THRESH_BINARY)		#50 ..nothin 70 is better
 				pupilFrame = cv2.morphologyEx(pupilFrame, cv2.MORPH_CLOSE, windowClose)
@@ -109,13 +120,17 @@ def main():
 						center['m00']=1
 					cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
 					cv2.circle(pupilO,(cx,cy),5,255,-1)
+
+				k = cv2.waitKey(33) 
+				if k==27:
+					break
 		
 			#show picture
 			cv2.imshow('frame',pupilO)
 			#cv2.imshow('frame2',pupilFrame)
-			if cv2.waitKey(1) & 0xFF == ord('q'):
-				break
-		
+			k = cv2.waitKey(33) 
+			if k==27:
+			    break
 		#else:
 			#break
 
