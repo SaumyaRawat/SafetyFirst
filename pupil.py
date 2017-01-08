@@ -4,9 +4,14 @@ import numpy as np
 import cv2
 import time
 
+import simpleaudio as sa
+wave_obj = sa.WaveObject.from_wave_file("alert.wav")
 cap = cv2.VideoCapture(0) 	#640,480
 w = 640
 h = 480
+
+count_open = 0
+count_closed = 0
 
 while(cap.isOpened()):
 	ret, frame = cap.read()
@@ -28,7 +33,11 @@ while(cap.isOpened()):
 		windowClose = np.ones((5,5),np.uint8)
 		windowOpen = np.ones((2,2),np.uint8)
 		windowErode = np.ones((2,2),np.uint8)
-
+		count_closed += 1
+		if count_closed > 5:
+			play_obj = wave_obj.play()
+			play_obj.wait_done()
+		count_open = 0
 		#draw square
 		for (x,y,w,h) in detected:
 			cv2.rectangle(frame, (x,y), ((x+w),(y+h)), (0,0,255),1)	
@@ -36,6 +45,9 @@ while(cap.isOpened()):
 			cv2.line(frame, (x+w,y), ((x,y+h)), (0,0,255),1)
 			pupilFrame = cv2.equalizeHist(frame[y+(h*.25):(y+h), x:(x+w)])
 			pupilO = pupilFrame
+			count_open += 1
+			count_closed = 0
+
 			ret, pupilFrame = cv2.threshold(pupilFrame,55,255,cv2.THRESH_BINARY)		#50 ..nothin 70 is better
 			pupilFrame = cv2.morphologyEx(pupilFrame, cv2.MORPH_CLOSE, windowClose)
 			pupilFrame = cv2.morphologyEx(pupilFrame, cv2.MORPH_ERODE, windowErode)
@@ -92,11 +104,10 @@ while(cap.isOpened()):
 				center = cv2.moments(largeBlob)
 				cx,cy = int(center['m10']/center['m00']), int(center['m01']/center['m00'])
 				cv2.circle(pupilO,(cx,cy),5,255,-1)
-
 	
 		#show picture
 		cv2.imshow('frame',pupilO)
-		cv2.imshow('frame2',pupilFrame)
+		#cv2.imshow('frame2',pupilFrame)
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 	
