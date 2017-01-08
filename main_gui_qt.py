@@ -31,7 +31,7 @@ class MyApp(QMainWindow):
         self.ui.pushButton.setText("Monitoring!")
         self.ui.pushButton.setStyleSheet("background-image: url(red.png);")
         QApplication.processEvents()
-        pupil.main()
+        pupil.main(self)
         if self.state == 'Start':
             self.state = 'Stop'
             self.StopMonitoring()

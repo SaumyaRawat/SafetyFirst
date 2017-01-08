@@ -1,12 +1,19 @@
 #Identify pupils. 
 import numpy as np
+import sys
+import urllib, json
 import cv2
 import time
 import simpleaudio as sa
+import googlemaps
+from datetime import datetime
+
+gmaps = googlemaps.Client(key='AIzaSyA1aBGwZwO0rooO9cgJVtYqzl37VhbhTVA')
+
 wave_obj = sa.WaveObject.from_wave_file("alert.wav")
 look_ahead = sa.WaveObject.from_wave_file("look_ahead.wav")
 
-def main():#indicator):
+def main(gui):
 	cap = cv2.VideoCapture(0) 	#640,480
 	w = 640
 	h = 480
@@ -33,6 +40,7 @@ def main():#indicator):
 			windowErode = np.ones((2,2),np.uint8)
 
 			count_closed += 1
+
 			if len(detected2)==0:
 			    count_side+=1
 			
@@ -45,6 +53,15 @@ def main():#indicator):
 
 			if count_closed > 3:
 				print('Wake Up!')
+				#gmaps call
+				#url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&type=restaurant&keyword=cruise&key=AIzaSyA1aBGwZwO0rooO9cgJVtYqzl37VhbhTVA"
+				#with urllib.request.urlopen("http://www.python.org") as url:
+				#	response = url.read()
+				#str_response = response.readall().decode('utf-8')
+				#data = json.loads(str_response)
+				#print(response)
+				addr='Closest Restaurant will be displayed here if you are sleepy'
+				gui.ui.addrBox.setText(addr)
 				play_obj = wave_obj.play()
 				play_obj.wait_done()
 			count_open = 0
